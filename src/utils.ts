@@ -1,4 +1,4 @@
-import { Kind, TSchema } from '@sinclair/typebox'
+import { Any, Kind, TSchema } from '@sinclair/typebox'
 import { Value } from '@sinclair/typebox/value'
 import { TypeCheck, TypeCompiler } from '@sinclair/typebox/compiler'
 
@@ -227,7 +227,12 @@ export const getSchemaValidator = (
 			Code: () => ''
 		} as unknown as TypeCheck<TSchema>
 
-	return TypeCompiler.Compile(schema, Object.values(models))
+	try {
+		return TypeCompiler.Compile(schema, Object.values(models))
+	} catch (error) {
+		console.error('Error compiling schema', s, error)
+		return
+	}
 }
 
 export const getResponseSchemaValidator = (
@@ -259,7 +264,12 @@ export const getResponseSchemaValidator = (
 				Code: () => ''
 			} as unknown as TypeCheck<TSchema>
 
-		return TypeCompiler.Compile(schema, references)
+		try {
+			return TypeCompiler.Compile(schema, references)
+		} catch (error) {
+			console.error('Error compiling schema', schema, error)
+			return TypeCompiler.Compile(Any())
+		}
 	}
 
 	if (Kind in maybeSchemaOrRecord) {
