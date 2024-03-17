@@ -9,79 +9,67 @@
   },
   "main": "./dist/cjs/index.js",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "bun": "./dist/bun/index.js",
       "import": "./dist/index.mjs",
       "require": "./dist/cjs/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.mts"
     },
     "./ws": {
-      "bun": "./dist/ws/index.js",
       "import": "./dist/ws/index.mjs",
       "require": "./dist/cjs/ws/index.js",
-      "types": "./dist/ws/index.d.ts"
+      "types": "./dist/ws/index.d.mts"
     },
     "./compose": {
-      "bun": "./dist/compose.js",
       "import": "./dist/compose.mjs",
       "require": "./dist/cjs/compose.js",
-      "types": "./dist/compose.d.ts"
+      "types": "./dist/compose.d.mts"
     },
     "./context": {
-      "bun": "./dist/context.js",
       "import": "./dist/context.mjs",
       "require": "./dist/cjs/context.js",
-      "types": "./dist/context.d.ts"
+      "types": "./dist/context.d.mts"
     },
     "./cookie": {
-      "bun": "./dist/cookie.js",
       "import": "./dist/cookie.mjs",
       "require": "./dist/cjs/cookie.js",
-      "types": "./dist/cookie.d.ts"
+      "types": "./dist/cookie.d.mts"
     },
     "./error": {
-      "bun": "./dist/error.js",
       "import": "./dist/error.mjs",
       "require": "./dist/cjs/error.js",
-      "types": "./dist/error.d.ts"
+      "types": "./dist/error.d.mts"
     },
     "./handler": {
-      "bun": "./dist/handler.js",
       "import": "./dist/handler.mjs",
       "require": "./dist/cjs/handler.js",
-      "types": "./dist/handler.d.ts"
+      "types": "./dist/handler.d.mts"
     },
     "./schema": {
-      "bun": "./dist/schema.js",
       "import": "./dist/schema.mjs",
       "require": "./dist/cjs/schema.js",
-      "types": "./dist/schema.d.ts"
+      "types": "./dist/schema.d.mts"
     },
     "./trace": {
-      "bun": "./dist/trace.js",
       "import": "./dist/trace.mjs",
       "require": "./dist/cjs/trace.js",
-      "types": "./dist/trace.d.ts"
+      "types": "./dist/trace.d.mts"
     },
     "./type-system": {
-      "bun": "./dist/type-system.js",
       "import": "./dist/type-system.mjs",
       "require": "./dist/cjs/type-system.js",
-      "types": "./dist/type-system.d.ts"
+      "types": "./dist/type-system.d.mts"
     },
     "./types": {
-      "bun": "./dist/types.js",
       "import": "./dist/types.mjs",
       "require": "./dist/cjs/types.js",
-      "types": "./dist/types.d.ts"
+      "types": "./dist/types.d.mts"
     },
     "./utils": {
-      "bun": "./dist/utils.js",
       "import": "./dist/utils.mjs",
       "require": "./dist/cjs/utils.js",
-      "types": "./dist/utils.d.ts"
+      "types": "./dist/utils.d.mts"
     }
   },
   "repository": {
@@ -102,8 +90,9 @@
     "test:functionality": "bun test && npm run test:node",
     "test:types": "tsc --project tsconfig.test.json",
     "test:node": "npm install --prefix ./test/node/cjs/ && npm install --prefix ./test/node/esm/ && node ./test/node/cjs/index.js && node ./test/node/esm/index.js && bun dist/bun/index.js",
-    "dev": "bun run --watch example/http.ts",
-    "build": "rimraf dist && bun build.ts",
+    "dev": "tsup --watch --sourcemap",
+    "dev:example": "bun run --watch example/http.ts",
+    "build": "tsup --clean",
     "release:local": "npm run build && npm run test && npm publish"
   },
   "dependencies": {
