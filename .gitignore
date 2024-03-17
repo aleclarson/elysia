@@ -6,3 +6,6 @@ dump.rdb
 dist
 trace
 .scannerwork
+
+.indo.json
+vendor
