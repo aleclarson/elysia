@@ -2471,27 +2471,7 @@ export default class Elysia<
 		if (plugin instanceof Promise) {
 			this.promisedModules.add(
 				plugin
-					.then((plugin) => {
-						if (typeof plugin === 'function') {
-							return plugin(this)
-						}
-
-						if (plugin instanceof Elysia) {
-							return this._use(plugin)
-						}
-
-						if (typeof plugin.default === 'function') {
-							return plugin.default(this)
-						}
-
-						if (plugin.default instanceof Elysia) {
-							return this._use(plugin.default)
-						}
-
-						throw new Error(
-							'Invalid plugin type. Expected Elysia instance, function, or module with "default" as Elysia instance or function that returns Elysia instance.'
-						)
-					})
+					.then((plugin) => this._resolveLazyLoadModule(plugin))
 					.then((x) => x.compile())
 			)
 			return this
@@ -2542,18 +2522,7 @@ export default class Elysia<
 								return plugin
 							}
 
-							if (typeof plugin === 'function')
-								return plugin(
-									this as unknown as any
-								) as unknown as Elysia
-
-							if (typeof plugin.default === 'function')
-								return plugin.default(
-									this as unknown as any
-								) as unknown as Elysia
-
-							// @ts-ignore
-							return this._use(plugin)
+							return this._resolveLazyLoadModule(plugin)
 						})
 						.then((x) => x.compile())
 				)
@@ -2893,6 +2862,37 @@ export default class Elysia<
 			}
 
 		return this
+	}
+
+	private _resolveLazyLoadModule(
+		plugin:
+			| AnyElysia
+			| ((app: AnyElysia) => MaybePromise<AnyElysia>)
+			| {
+					default:
+						| AnyElysia
+						| ((app: AnyElysia) => MaybePromise<AnyElysia>)
+			  }
+	) {
+		if (typeof plugin === 'function') {
+			return plugin(this)
+		}
+
+		if (plugin instanceof Elysia) {
+			return this._use(plugin)
+		}
+
+		if (typeof plugin.default === 'function') {
+			return plugin.default(this)
+		}
+
+		if (plugin.default instanceof Elysia) {
+			return this._use(plugin.default)
+		}
+
+		throw new Error(
+			'Invalid plugin type. Expected Elysia instance, function, or module with "default" as Elysia instance or function that returns Elysia instance.'
+		)
 	}
 
 	macro<const NewMacro extends BaseMacro>(
