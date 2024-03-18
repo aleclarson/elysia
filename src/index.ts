@@ -2468,70 +2468,43 @@ export default class Elysia<
 			return current
 		}
 
+		if (typeof plugin === 'function') {
+			plugin = plugin(this)
+			if (plugin === this) {
+				this.compile()
+				return this
+			}
+		}
+
 		if (plugin instanceof Promise) {
 			this.promisedModules.add(
-				plugin
-					.then((plugin) => this._resolveLazyLoadModule(plugin))
-					.then((x) => x.compile())
+				plugin.then(async (plugin) => {
+					if (typeof plugin === 'function') {
+						await plugin(this)
+					} else if (plugin instanceof Elysia) {
+						this._use(plugin)
+					} else if (typeof plugin.default === 'function') {
+						await plugin.default(this)
+					} else if (plugin.default instanceof Elysia) {
+						this._use(plugin.default)
+					} else
+						throw new Error(
+							'Invalid plugin type. Expected Elysia instance, function, or module with "default" as Elysia instance or function that returns Elysia instance.'
+						)
+
+					this.compile()
+				})
 			)
 			return this
 		}
 
-		return this._use(plugin)
+		this._use(plugin)
+
+		this.compile()
+		return this
 	}
 
-	private _use(
-		plugin: AnyElysia | ((app: AnyElysia) => MaybePromise<AnyElysia>)
-	) {
-		if (typeof plugin === 'function') {
-			const instance = plugin(this as unknown as any) as unknown as any
-			if (instance instanceof Promise) {
-				this.promisedModules.add(
-					instance
-						.then((plugin) => {
-							if (plugin instanceof Elysia) {
-								this.compile()
-
-								// Recompile async plugin routes
-								for (const {
-									method,
-									path,
-									handler,
-									hooks
-								} of Object.values(plugin.router.history)) {
-									this.add(
-										method,
-										path,
-										handler,
-										mergeHook(
-											hooks as LocalHook<
-												any,
-												any,
-												any,
-												any,
-												any,
-												any
-											>,
-											{
-												error: plugin.event.error
-											}
-										)
-									)
-								}
-
-								return plugin
-							}
-
-							return this._resolveLazyLoadModule(plugin)
-						})
-						.then((x) => x.compile())
-				)
-				return this as unknown as any
-			}
-
-			return instance
-		}
-
+	private _use(plugin: AnyElysia) {
 		if (plugin.promisedModules.size) {
 			this.promisedModules.add(
 				plugin.modules
@@ -2862,37 +2835,6 @@ export default class Elysia<
 			}
 
 		return this
-	}
-
-	private _resolveLazyLoadModule(
-		plugin:
-			| AnyElysia
-			| ((app: AnyElysia) => MaybePromise<AnyElysia>)
-			| {
-					default:
-						| AnyElysia
-						| ((app: AnyElysia) => MaybePromise<AnyElysia>)
-			  }
-	) {
-		if (typeof plugin === 'function') {
-			return plugin(this)
-		}
-
-		if (plugin instanceof Elysia) {
-			return this._use(plugin)
-		}
-
-		if (typeof plugin.default === 'function') {
-			return plugin.default(this)
-		}
-
-		if (plugin.default instanceof Elysia) {
-			return this._use(plugin.default)
-		}
-
-		throw new Error(
-			'Invalid plugin type. Expected Elysia instance, function, or module with "default" as Elysia instance or function that returns Elysia instance.'
-		)
 	}
 
 	macro<const NewMacro extends BaseMacro>(
