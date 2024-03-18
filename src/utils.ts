@@ -756,7 +756,8 @@ export class PromiseGroup implements PromiseLike<void> {
 	private async drain() {
 		while (this.promises.length > 0) {
 			try {
-				await this.promises.shift()
+				await this.promises[0]
+				this.promises.shift()
 			} catch (error) {
 				this.onError(error)
 			}
